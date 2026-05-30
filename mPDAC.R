@@ -48,16 +48,16 @@ query <- GDCquery(
   workflow.type = "STAR - Counts"
 )
 
-# Download the data (this will take a few minutes)
+# Download data 
 GDCdownload(query, directory = "data/raw/TCGA-PAAD")
 
-# Prepare the data into a usable format
+# Prepare data into a usable format
 tcga_data <- GDCprepare(query, directory = "data/raw/TCGA-PAAD")
 
-# Save it so you don't have to re-download
+# Save 
 saveRDS(tcga_data, file = "data/processed/tcga_paad_raw.rds")
 
-# Quick check - how many samples and genes do we have?
+# Number of samples and genes
 dim(tcga_data)
 
 dir.exists("data/raw")
@@ -73,7 +73,7 @@ query <- GDCquery(
 GDCdownload(query, directory = "data/raw/TCGA-PAAD")
 tcga_data <- GDCprepare(query, directory = "data/raw/TCGA-PAAD")
 saveRDS(tcga_data, file = "data/processed/tcga_paad_raw.rds")
-# Save your session
+# Save 
 save.session <- getwd()
 cat("Working directory:", save.session)
 setwd("C:/Sanjay/mPDAC Project")
@@ -83,7 +83,7 @@ tcga_data <- readRDS("data/processed/tcga_paad_raw.rds")
 # Extract clinical information
 clinical_data <- as.data.frame(colData(tcga_data))
 
-# How many patients and variables do we have?
+# Number of Patients
 dim(clinical_data)
 library(TCGAbiolinks)
 clinical_data <- as.data.frame(colData(tcga_data))
@@ -96,7 +96,7 @@ colnames(clinical_data)
 # Look at vital status and tumour stage
 table(clinical_data$vital_status)
 table(clinical_data$ajcc_pathologic_stage)
-# Extract the unstranded raw counts
+# Extract unstranded raw counts
 count_matrix <- assay(tcga_data, "unstranded")
 
 # Check dimensions
