@@ -231,3 +231,226 @@ pheatmap(heatmap_matrix_scaled,
          border_color = NA)
 
 dev.off()
+
+#Installing Clusterprofiler package
+BiocManager::install("clusterProfiler")
+BiocManager::install("org.Hs.eg.db")
+#Loading Library
+library(clusterProfiler)
+library(org.Hs.eg.db)
+
+setwd("C:/Sanjay/mPDAC Project")
+
+#Uploading Tables of UR and DR DEGs
+upregulated <- read.csv("results/tables/upregulated_DEGs.csv", row.names = 1)
+downregulated <- read.csv("results/tables/downregulated_DEGs.csv", row.names = 1)
+
+# Combining upregulated and downregulated gene symbols
+all_sig_genes <- c(rownames(upregulated), rownames(downregulated))
+
+# Converting gene symbols to Entrez IDs for clusterProfiler
+gene_entrez <- bitr(all_sig_genes, 
+                    fromType = "SYMBOL", 
+                    toType = "ENTREZID", 
+                    OrgDb = org.Hs.eg.db)
+
+head(gene_entrez)
+nrow(gene_entrez)
+
+#Identifying Biological Processes using Gene Ontology 
+go_bp <- enrichGO(gene = gene_entrez$ENTREZID,
+                  OrgDb = org.Hs.eg.db,
+                  keyType = "ENTREZID",
+                  ont = "BP",
+                  pAdjustMethod = "BH",
+                  pvalueCutoff = 0.05,
+                  qvalueCutoff = 0.05,
+                  readable = TRUE)
+
+head(go_bp@result, 10)
+
+library(enrichplot)
+
+# Dot plot of top 15 enriched terms
+dotplot(go_bp, showCategory = 15) + 
+  ggtitle("GO Biological Process Enrichment - PDAC DEGs")
+
+
+library(ggplot2)
+
+# Fewer categories + larger plot + text wrapping
+dotplot(go_bp, showCategory = 10) + 
+  ggtitle("GO Biological Process Enrichment - PDAC DEGs") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
+
+ggsave("results/figures/GO_BP_dotplot.png", 
+       width = 11, height = 9, dpi = 300)
+
+# Convert upregulated genes
+up_entrez <- bitr(rownames(upregulated), 
+                  fromType = "SYMBOL", 
+                  toType = "ENTREZID", 
+                  OrgDb = org.Hs.eg.db)
+
+# Convert downregulated genes
+down_entrez <- bitr(rownames(downregulated), 
+                    fromType = "SYMBOL", 
+                    toType = "ENTREZID", 
+                    OrgDb = org.Hs.eg.db)
+
+# Check counts
+nrow(up_entrez)
+nrow(down_entrez)
+
+# GO enrichment for upregulated genes
+go_bp_up <- enrichGO(gene = up_entrez$ENTREZID,
+                     OrgDb = org.Hs.eg.db,
+                     keyType = "ENTREZID",
+                     ont = "BP",
+                     pAdjustMethod = "BH",
+                     pvalueCutoff = 0.05,
+                     qvalueCutoff = 0.05,
+                     readable = TRUE)
+
+# GO enrichment for downregulated genes
+go_bp_down <- enrichGO(gene = down_entrez$ENTREZID,
+                       OrgDb = org.Hs.eg.db,
+                       keyType = "ENTREZID",
+                       ont = "BP",
+                       pAdjustMethod = "BH",
+                       pvalueCutoff = 0.05,
+                       qvalueCutoff = 0.05,
+                       readable = TRUE)
+
+#Dot plot for Upregulated genes
+dotplot(go_bp_up, showCategory = 10) + 
+  ggtitle("GO Biological Process - Upregulated Genes (Tumour vs Normal)") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
+
+ggsave("results/figures/GO_BP_upregulated.png", 
+       width = 11, height = 9, dpi = 300)
+
+#Dot plot for Downregulated genes
+dotplot(go_bp_down, showCategory = 10) + 
+  ggtitle("GO Biological Process - Downregulated Genes (Tumour vs Normal)") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
+
+ggsave("results/figures/GO_BP_downregulated.png", 
+       width = 11, height = 9, dpi = 300)
+
+# KEGG enrichment for upregulated genes
+kegg_up <- enrichKEGG(gene = up_entrez$ENTREZID,
+                      organism = "hsa",
+                      pvalueCutoff = 0.05,
+                      pAdjustMethod = "BH")
+
+head(kegg_up@result[, c("Description", "GeneRatio", "p.adjust", "Count")], 10)
+
+# KEGG enrichment for downregulated genes
+kegg_down <- enrichKEGG(gene = down_entrez$ENTREZID,
+                        organism = "hsa",
+                        pvalueCutoff = 0.05,
+                        pAdjustMethod = "BH")
+
+head(kegg_down@result[, c("Description", "GeneRatio", "p.adjust", "Count")], 10)
+
+#Dot plot for KEGG_DOWN
+dotplot(kegg_down, showCategory = 10) + 
+  ggtitle("KEGG Pathways - Downregulated Genes (Tumour vs Normal)") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
+
+ggsave("results/figures/KEGG_downregulated.png", 
+       width = 11, height = 9, dpi = 300)
+
+#Dot plot for KEGG_UP
+dotplot(kegg_up, showCategory = 10) + 
+  ggtitle("KEGG Pathways - Upregulated Genes (Tumour vs Normal)") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
+
+ggsave("results/figures/KEGG_upregulated.png", 
+       width = 11, height = 9, dpi = 300)
+
+library(survival)
+library(survminer)
+setwd("C:/Sanjay/mPDAC Project")
+clinical_filtered <- readRDS("data/processed/tcga_paad_clinical_filtered.rds")
+count_matrix_annotated <- readRDS("data/processed/tcga_paad_counts_annotated.rds")
+
+# Survival time and event status
+clinical_filtered$time <- ifelse(
+  clinical_filtered$vital_status == "Dead",
+  clinical_filtered$days_to_death,
+  clinical_filtered$days_to_last_follow_up
+)
+
+clinical_filtered$event <- ifelse(
+  clinical_filtered$vital_status == "Dead", 1, 0
+)
+
+# Checking for missing values
+sum(is.na(clinical_filtered$time))
+table(clinical_filtered$event)
+
+# Filtering tumor samples only for survival analysis
+tumor_samples <- clinical_filtered$sample_type == "Primary Tumor"
+clinical_tumor <- clinical_filtered[tumor_samples, ]
+count_matrix_tumor <- count_matrix_annotated[, tumor_samples]
+
+dim(clinical_tumor)
+dim(count_matrix_tumor)
+table(clinical_tumor$event)
+
+# Extraction of PSCA expression across tumor samples
+# Since PSCA is well established in literature as a marker for PDAC
+psca_expr <- count_matrix_tumor["PSCA", ]
+
+# Median splitting for High and Low
+psca_group <- ifelse(psca_expr > median(psca_expr), "High", "Low")
+
+# Including to clinical data
+clinical_tumor$psca_group <- psca_group
+
+clinical_tumor$psca_group <- psca_group
+
+# Checking the median split
+table(clinical_tumor$psca_group)
+
+# Creating survival object
+surv_object <- Surv(time = clinical_tumor$time, event = clinical_tumor$event)
+
+# Fitting of Kaplan-Meier curves by PSCA group
+fit_psca <- survfit(surv_object ~ psca_group, data = clinical_tumor)
+
+print(fit_psca)
+
+# Log-rank test
+survdiff(surv_object ~ psca_group, data = clinical_tumor)
+
+ggsurvplot(fit_psca, 
+           data = clinical_tumor,
+           pval = TRUE,
+           risk.table = TRUE,
+           conf.int = TRUE,
+           xlab = "Time (days)",
+           ylab = "Survival Probability",
+           title = "Kaplan-Meier Survival Curve - PSCA Expression in PDAC",
+           legend.title = "PSCA Expression",
+           legend.labs = c("High", "Low"),
+           palette = c("#E64B35", "#4DBBD5"))
+
+png("results/figures/KM_PSCA_survival.png", 
+    width = 9, height = 8, units = "in", res = 300)
+
+print(ggsurvplot(fit_psca, 
+                 data = clinical_tumor,
+                 pval = TRUE,
+                 risk.table = TRUE,
+                 conf.int = TRUE,
+                 xlab = "Time (days)",
+                 ylab = "Survival Probability",
+                 title = "Kaplan-Meier Survival Curve - PSCA Expression in PDAC",
+                 legend.title = "PSCA Expression",
+                 legend.labs = c("High", "Low"),
+                 palette = c("#E64B35", "#4DBBD5")))
+
+dev.off()
