@@ -47,3 +47,7 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Project data (large; regenerate with scripts/01 and 02)
+data/
+*.rds
