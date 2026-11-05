@@ -12,6 +12,8 @@ An ongoing computational project using public bulk and single-cell RNA-seq data 
 - SI and CT83 have extreme fold changes because they are undetected in the 4 normals (on/off, not effect size).
 - Survival (150 tumours, 82 deaths): PSCA shows a consistent but modest trend (median split p = 0.06; age-adjusted Cox HR 1.10 per log2 unit, p = 0.024). SI (p = 0.8) and KLRF1 (p = 0.4) show no association.
 
+**Basal vs classical (tumour-only):** 65 basal vs 85 classical tumours; 815 high-confidence genes (280 higher in basal, 535 higher in classical). Basal tumours show a squamous/keratinocyte program (epidermis development, keratinization) and higher TP63 and EMT-associated genes; classical tumours show a gut-like program (digestion, xenobiotic metabolism). Tumour purity does not differ between subtypes (p = 0.77). 36 of the 49 Moffitt signature genes are recovered, as expected, since the subtypes were defined from expression.
+
 **Limitations:** only 4 normal samples; bulk tissue (purity and composition confound immune genes); no independent validation yet.
 
 ## Next steps
@@ -31,9 +33,10 @@ scripts/
   04_enrichment.R            GO BP and KEGG over-representation
   05_subtype_purity.R        Moffitt subtype and tumour-purity checks
   06_survival.R              Kaplan-Meier, log-rank and Cox models
+  07_basal_vs_classical.R    tumour-only subtype comparison, GO, volcano
 results/
   tables/                    DESeq2 results, DEG lists, enrichment tables
-  figures/                   volcano plot, heatmap
+  figures/                   volcano plots, heatmap, enrichment and survival plots
 legacy/
   mPDAC_original_178tumours.R   first-pass analysis, superseded (kept for transparency)
 ```
