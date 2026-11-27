@@ -14,11 +14,18 @@ An ongoing computational project using public bulk and single-cell RNA-seq data 
 
 **Basal vs classical (tumour-only):** 65 basal vs 85 classical tumours; 815 high-confidence genes (280 higher in basal, 535 higher in classical). Basal tumours show a squamous/keratinocyte program (epidermis development, keratinization) and higher TP63 and EMT-associated genes; classical tumours show a gut-like program (digestion, xenobiotic metabolism). Tumour purity does not differ between subtypes (p = 0.77). 36 of the 49 Moffitt signature genes are recovered, as expected, since the subtypes were defined from expression.
 
+**Phase 2 (GSE71729, Moffitt 2015 microarray; limma):**
+- Tumour vs normal (145 primaries vs 46 normal pancreas) validates the TCGA results: 65% of TCGA upregulated genes replicate, but only 22% of downregulated (mainly immune) genes; fold-change agreement rho = 0.40.
+- PSCA is reproducibly higher in tumours (logFC 1.77, padj 1e-10) but does not predict survival (HR 1.08, p = 0.29; HR 1.03 after adjusting for subtype) and is basal-leaning.
+- Basal subtype predicts worse survival (HR 1.86, p = 0.005).
+- A 20-gene positive-control panel (up in tumours and subtype-neutral in both datasets) for checking future datasets.
+- A portable basal-classical score (23 + 23 Moffitt genes): metastases lean more basal than primaries (median 0.10 vs -0.19, p = 0.015), most clearly liver metastases (0.28, p = 0.010), not explained by liver background (-0.12). Caveats: patient structure unknown; metastases likely later-stage disease; bulk tissue.
+
 **Limitations:** only 4 normal samples; bulk tissue (purity and composition confound immune genes); no independent validation yet.
 
 ## Next steps
 
-1. Validate in independent bulk cohorts (GSE71729, GSE21501)
+1. Liver metastasis genes beyond subtype and liver background (GSE71729); validation in GSE21501
 2. Primary vs metastatic comparison at single-cell level (GSE154778, Seurat)
 3. Pan-cancer and normal-tissue specificity (TCGA Pan-Cancer, GTEx)
 
@@ -34,6 +41,9 @@ scripts/
   05_subtype_purity.R        Moffitt subtype and tumour-purity checks
   06_survival.R              Kaplan-Meier, log-rank and Cox models
   07_basal_vs_classical.R    tumour-only subtype comparison, GO, volcano
+  08_gse71729_setup_validation.R  GEO download, limma tumour vs normal, TCGA replication
+  09_psca_and_control_panel.R     PSCA survival/subtype, GEO basal vs classical, control panel
+  10_subtype_score_metastasis.R   basal-classical score, organ background, metastases vs primaries
 results/
   tables/                    DESeq2 results, DEG lists, enrichment tables
   figures/                   volcano plots, heatmap, enrichment and survival plots
