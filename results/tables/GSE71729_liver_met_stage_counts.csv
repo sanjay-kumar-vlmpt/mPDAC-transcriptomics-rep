@@ -1,0 +1,5 @@
+"stage","up","down"
+"Naive (no adjustment)",445,608
+"Adjusted for subtype + tumour content",465,534
+"Beyond liver background",32,87
+"Also excluding pancreas tissue genes",32,78
