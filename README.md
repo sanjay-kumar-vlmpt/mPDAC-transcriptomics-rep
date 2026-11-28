@@ -21,14 +21,14 @@ An ongoing computational project using public bulk and single-cell RNA-seq data 
 - A 20-gene positive-control panel (up in tumours and subtype-neutral in both datasets) for checking future datasets.
 - A portable basal-classical score (23 + 23 Moffitt genes): metastases lean more basal than primaries (median 0.10 vs -0.19, p = 0.015), most clearly liver metastases (0.28, p = 0.010), not explained by liver background (-0.12). Caveats: patient structure unknown; metastases likely later-stage disease; bulk tissue.
 - Liver metastases vs primaries, adjusted for subtype and tumour content and filtered for liver and pancreas tissue background: 32 up / 78 down genes (from 445 / 608 naive). Lower MHC class II antigen presentation and interferon/T-cell recruitment genes (HLA-DR/DP/DQ, CD74, CXCL9; GO padj 9e-16) suggest immunologically colder liver metastases; a non-significant hypoxia/glycolysis hint (HK2, VEGFA, NDRG1) may reflect autopsy sampling.
+- GSE21501 (Stratford 2010) was checked as a third survival cohort, but an expression-based overlap check showed 89 of its 102 survival patients are the same patients as GSE71729 primaries (profile correlation > 0.6 and identical survival months), so it is not independent and was not used for validation.
 
 **Limitations:** only 4 normal samples; bulk tissue (purity and composition confound immune genes); no independent validation yet.
 
 ## Next steps
 
-1. Survival validation of the basal-classical score in GSE21501
-2. Primary vs metastatic comparison at single-cell level (GSE154778, Seurat)
-3. Pan-cancer and normal-tissue specificity (TCGA Pan-Cancer, GTEx)
+1. Primary vs metastatic cells at single-cell level (GSE154778, Seurat)
+2. Pan-cancer and normal-tissue specificity (TCGA Pan-Cancer, GTEx)
 
 ## Repository structure
 
@@ -46,6 +46,7 @@ scripts/
   09_psca_and_control_panel.R     PSCA survival/subtype, GEO basal vs classical, control panel
   10_subtype_score_metastasis.R   basal-classical score, organ background, metastases vs primaries
   11_liver_metastasis_genes.R     liver-met genes beyond subtype, tumour content and tissue background
+  12_gse21501_overlap_check.R     GSE21501 processing and patient-overlap check with GSE71729
 results/
   tables/                    DESeq2 results, DEG lists, enrichment tables
   figures/                   volcano plots, heatmap, enrichment and survival plots
